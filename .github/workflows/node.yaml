@@ -16,11 +16,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js 22.x
+      - name: Use Node.js 18.x
         # This should match the version of Node.js you have defined in the manifest.json runtime field
         uses: actions/setup-node@v4
         with:
-          node-version: 22.x
+          node-version: 18.x
       - name: Prepare Environment
         run: |
           corepack enable
