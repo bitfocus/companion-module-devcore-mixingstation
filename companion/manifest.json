@@ -1,0 +1,26 @@
+{
+	"id": "mixing-station",
+	"name": "mixing-station",
+	"shortname": "mixing-station",
+	"description": "Remote control digital audio mixers via Mixing Station API",
+	"version": "1.0.0",
+	"license": "MIT",
+	"repository": "git+https://github.com/bitfocus/companion-module-devcore-mixingstation.git",
+	"bugs": "https://github.com/bitfocus/companion-module-devcore-mixingstation/issues",
+	"maintainers": [
+		{
+			"name": "davidgiga1993",
+			"email": "david@dev-core.org"
+		}
+	],
+	"runtime": {
+		"type": "node18",
+		"api": "nodejs-ipc",
+		"apiVersion": "0.0.0",
+		"entrypoint": "../dist/main.js"
+	},
+	"legacyIds": [],
+	"manufacturer": "Mixing Station e.K.",
+	"products": ["Mixing Station"],
+	"keywords": ["Audio", "Mixer"]
+}
