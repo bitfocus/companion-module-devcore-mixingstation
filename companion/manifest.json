@@ -1,5 +1,5 @@
 {
-	"id": "companion-module-devcore-mixingstation",
+	"id": "devcore-mixingstation",
 	"name": "Mixing Station",
 	"shortname": "mixing-station",
 	"description": "Remote control digital audio mixers via Mixing Station API",
