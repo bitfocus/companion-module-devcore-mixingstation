@@ -1,4 +1,4 @@
-import type { ModuleInstance } from './main.js'
+import type { ModuleInstance } from './main.ts'
 
 export function UpdateActions(self: ModuleInstance): void {
 	self.setActionDefinitions({

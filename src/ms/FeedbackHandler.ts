@@ -96,7 +96,7 @@ export class FeedbackHandler {
 	}
 
 	private toVariableId(path: string): string {
-		return 'var_' + path.replaceAll('.', '-')
+		return 'mixer_' + path.replaceAll('.', '-')
 	}
 }
 

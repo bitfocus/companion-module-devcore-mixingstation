@@ -8,7 +8,7 @@ import {
 } from '@companion-module/base'
 import { Logger } from './Logger.js'
 import { MixingStation } from './ms/MixingStation.js'
-import { TopState } from './ms/Model.js'
+import { DataPathsDto, TopState } from './ms/Model.js'
 import { FeedbackHandler } from './ms/FeedbackHandler.js'
 
 export interface CompanionData {
@@ -171,19 +171,33 @@ export class CompanionDataFactory {
 					this.ms.setValue(event.options.path as string, event.options.valN as number)
 				},
 			} as CompanionActionDefinition
+			actions.toggleValue = {
+				name: 'Toggle Value',
+				options: [
+					{
+						id: 'path',
+						type: 'dropdown',
+						choices: pathChoices,
+						label: 'Path',
+						default: '',
+					},
+				],
+				callback: async (event) => {
+					await this.ms.toggleValue(event.options.path as string)
+				},
+			} as CompanionActionDefinition
 		}
 		return actions
 	}
 
-	private getAllParams(tree: any, path: string): DropdownChoice[] {
+	private getAllParams(tree: Record<string, DataPathsDto>, path: string): DropdownChoice[] {
 		let out: DropdownChoice[] = []
 		for (const key in tree) {
 			const child = tree[key]
-
 			if (Object.prototype.hasOwnProperty.call(child, 'val')) {
 				// Value list
 				const prefix = path + key + '.'
-				const paramNames = child.val as string[]
+				const paramNames = child.val
 				for (let X = 0; X < paramNames.length; X++) {
 					const valuePath = prefix + paramNames[X]
 					out.push({ id: valuePath, label: valuePath } as DropdownChoice)

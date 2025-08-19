@@ -1,7 +1,7 @@
 {
 	"id": "devcore-mixingstation",
 	"name": "Mixing Station",
-	"shortname": "mixing-station",
+	"shortname": "ms",
 	"description": "Remote control digital audio mixers via Mixing Station API",
 	"version": "1.0.0",
 	"license": "MIT",
@@ -10,17 +10,17 @@
 	"maintainers": [
 		{
 			"name": "davidgiga1993",
-			"email": "david@dev-core.org"
+			"email": "support@mixingstation.app"
 		}
 	],
 	"runtime": {
-		"type": "node18",
+		"type": "node22",
 		"api": "nodejs-ipc",
 		"apiVersion": "0.0.0",
 		"entrypoint": "../dist/main.js"
 	},
 	"legacyIds": [],
-	"manufacturer": "Mixing Station e.K.",
+	"manufacturer": "Mixing Station GmbH",
 	"products": ["Mixing Station"],
 	"keywords": ["Audio", "Mixer"]
 }

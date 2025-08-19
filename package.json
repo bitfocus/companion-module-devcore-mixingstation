@@ -1,47 +1,51 @@
 {
-	"name": "mixing-station",
-	"version": "1.0.0",
-	"main": "dist/main.js",
-	"type": "module",
-	"scripts": {
-		"postinstall": "husky",
-		"format": "prettier -w .",
-		"package": "run build && companion-module-build",
-		"build": "rimraf dist && yarn run build:main",
-		"build:main": "tsc -p tsconfig.build.json",
-		"dev": "tsc -p tsconfig.build.json --watch",
-		"lint:raw": "eslint",
-		"lint": "yarn run lint:raw ."
-	},
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/bitfocus/companion-module-devcore-mixingstation.git"
-	},
-	"dependencies": {
-		"@companion-module/base": "~1.11.2",
-		"ws": "^8.18.0"
-	},
-	"devDependencies": {
-		"@companion-module/tools": "^2.1.1",
-		"@types/node": "^22.10.2",
-		"@types/ws": "^8",
-		"eslint": "^9.17.0",
-		"husky": "^9.1.7",
-		"lint-staged": "^15.2.11",
-		"prettier": "^3.4.2",
-		"rimraf": "^6.0.1",
-		"typescript": "~5.5.4",
-		"typescript-eslint": "^8.18.1"
-	},
-	"prettier": "@companion-module/tools/.prettierrc.json",
-	"lint-staged": {
-		"*.{css,json,md,scss}": [
-			"prettier --write"
-		],
-		"*.{ts,tsx,js,jsx}": [
-			"yarn lint:raw --fix"
-		]
-	},
-	"packageManager": "yarn@4.5.3"
+  "name": "mixing-station",
+  "version": "1.0.0",
+  "main": "dist/main.js",
+  "type": "module",
+  "scripts": {
+    "postinstall": "husky",
+    "format": "prettier -w .",
+    "package": "run build && companion-module-build",
+    "build": "rimraf dist && yarn run build:main",
+    "build:main": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "lint:raw": "eslint",
+    "lint": "yarn run lint:raw ."
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitfocus/companion-module-devcore-mixingstation.git"
+  },
+  "engines": {
+    "node": "^22.14",
+    "yarn": "^4"
+  },
+  "dependencies": {
+    "@companion-module/base": "~1.11.3",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@companion-module/tools": "^2.3.0",
+    "@types/node": "^22.10.2",
+    "@types/ws": "^8",
+    "eslint": "^9.17.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.11",
+    "prettier": "^3.5.3",
+    "rimraf": "^6.0.1",
+    "typescript": "~5.5.4",
+    "typescript-eslint": "^8.18.1"
+  },
+  "prettier": "@companion-module/tools/.prettierrc.json",
+  "lint-staged": {
+    "*.{css,json,md,scss}": [
+      "prettier --write"
+    ],
+    "*.{ts,tsx,js,jsx}": [
+      "yarn lint:raw --fix"
+    ]
+  },
+  "packageManager": "yarn@4.9.1"
 }

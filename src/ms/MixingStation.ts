@@ -1,7 +1,7 @@
 import WebSocket from 'ws'
 import { clearTimeout } from 'node:timers'
 import { Logger } from '../Logger.js'
-import { AppStateDto, ConsoleListDto, TopState, ValueDto, ValueType } from './Model.js'
+import { AppStateDto, ConsoleListDto, DataDefinitionsV2, DataPathsDto, TopState, ValueDto, ValueType } from './Model.js'
 
 export interface MsEvents {
 	onConnected(): void
@@ -75,12 +75,56 @@ export class MixingStation {
 		this.send('/console/data/set/' + path + '/' + this.valueFormat, 'POST', { value: value })
 	}
 
+	async toggleValue(path: string): Promise<void> {
+		// We don't necessarily have the current state
+		const currentValue = await this.getValue(path)
+		let newValue: any = null
+		if (typeof currentValue.value === 'boolean') {
+			newValue = !currentValue.value
+		} else if (typeof currentValue.value === 'number') {
+			// We need details about the value range of this parameter
+			const def = await this.getValueDefinition(path)
+			if (def.value == null) {
+				this.logger.warning('Value has no definition ' + path)
+				return
+			}
+
+			if (def.value.enums == null) {
+				this.logger.warning('Unsupported type for toggle ' + typeof def.value.type)
+				return
+			}
+			// Find current and toggle
+			const enumId = currentValue.value
+
+			for (let X = 0; X < def.value.enums.length; X++) {
+				if (def.value.enums[X].id == enumId) {
+					// Use next enum
+					let targetEnum = X + 1
+					if (targetEnum >= def.value.enums.length) {
+						targetEnum = 0
+					}
+					newValue = def.value.enums[targetEnum].id
+					break
+				}
+			}
+		} else {
+			this.logger.warning('Unsupported type for toggle ' + typeof currentValue.value)
+			return
+		}
+		this.send('/console/data/set/' + path + '/' + this.valueFormat, 'POST', { value: newValue })
+	}
+
 	async getValue(path: string): Promise<ValueDto> {
 		const msg = await this.getResponse('/console/data/get/' + path + '/' + this.valueFormat, 'GET', null)
 		return msg.body as ValueDto
 	}
 
-	async getAllDataPaths(): Promise<any> {
+	async getValueDefinition(path: string): Promise<DataDefinitionsV2> {
+		const msg = await this.getResponse('/console/data/definitions2/' + path, 'GET', null)
+		return msg.body as DataDefinitionsV2
+	}
+
+	async getAllDataPaths(): Promise<DataPathsDto> {
 		const msg = await this.getResponse('/console/data/paths', 'GET', null)
 		return msg.body
 	}
@@ -107,6 +151,7 @@ export class MixingStation {
 			this.disconnect()
 		}
 
+		this.logger.debug('Connect to ' + this.host + ':' + this.port)
 		this.active = true
 		this.ws = new WebSocket('ws://' + this.host + ':' + this.port)
 		this.ws.on('error', (err) => {
@@ -128,7 +173,9 @@ export class MixingStation {
 	}
 
 	disconnect(): void {
+		this.logger.debug('Disconnect from ' + this.host + ':' + this.port)
 		this.active = false
+		this.logger.debug('DC Active ' + this.active)
 		if (this.ws) {
 			this.ws.close()
 			this.ws = null
@@ -164,6 +211,11 @@ export class MixingStation {
 		if (this.active) {
 			// Reconnect
 			setTimeout(() => {
+				if (!this.active) {
+					// Has been deactivated in the meantime
+					return
+				}
+				this.logger.debug('Reconnecting...')
 				this.connect()
 			}, 1000)
 		}

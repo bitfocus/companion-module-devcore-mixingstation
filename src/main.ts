@@ -12,9 +12,11 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> implements MsEven
 
 	ms: MixingStation | null = null
 	feedbackHandler: FeedbackHandler | null = null
+	private logger: ModuleLogger
 
 	constructor(internal: unknown) {
 		super(internal)
+		this.logger = new ModuleLogger(this, 'main')
 	}
 
 	async init(config: ModuleConfig): Promise<void> {
@@ -26,7 +28,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> implements MsEven
 
 	// When module gets deleted
 	async destroy(): Promise<void> {
-		this.log('debug', 'destroy')
+		this.logger.debug('destroy')
 		if (this.ms) {
 			this.ms.disconnect()
 			this.ms = null
@@ -34,7 +36,9 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> implements MsEven
 	}
 
 	async configUpdated(config: ModuleConfig): Promise<void> {
+		this.logger.debug('config updated')
 		this.config = config
+		this.ms?.disconnect()
 		this.connectToMs()
 	}
 
@@ -47,7 +51,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> implements MsEven
 	}
 
 	onAppStateChanged(state: AppStateDto): void {
-		this.log('debug', 'App state changed: ' + state.topState)
+		this.logger.debug('App state changed: ' + state.topState)
 		if (state.topState == TopState.CONNECTED) {
 			// MS is connected to a mixer
 			// -> Refresh available actions
@@ -60,7 +64,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> implements MsEven
 	}
 
 	private connectToMs(): void {
-		this.updateStatus(InstanceStatus.Connecting)
+		this.updateStatus(InstanceStatus.Connecting, this.config.host + ':' + this.config.port)
 		this.ms = new MixingStation(this.config.host, this.config.port, new ModuleLogger(this, 'MS'), this)
 		this.feedbackHandler = new FeedbackHandler(this.ms, this, new ModuleLogger(this, 'Fdk'))
 		this.ms.connect()
@@ -72,7 +76,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> implements MsEven
 	}
 
 	async updateCompanionDefinitions(): Promise<void> {
-		this.log('debug', 'Updating actions')
+		this.logger.debug('Updating actions')
 		if (!this.ms || !this.feedbackHandler) return
 
 		const logger = new ModuleLogger(this, 'DataFactory')
