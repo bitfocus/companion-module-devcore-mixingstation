@@ -138,8 +138,8 @@ export class MixingStation {
 		return this.currentAppState
 	}
 
-	startOfflineMode(consoleId: number, model: string): void {
-		this.send('/app/mixers/offline', 'POST', { consoleId: consoleId, model: model })
+	startOfflineMode(consoleId: number, modelId: number): void {
+		this.send('/app/mixers/offline', 'POST', { consoleId: consoleId, modelId: modelId })
 	}
 
 	connectToMixer(consoleId: number, host: string): void {

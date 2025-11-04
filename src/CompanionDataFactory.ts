@@ -110,10 +110,10 @@ export class CompanionDataFactory {
 			type: 'dropdown',
 			choices: consoles.consoles
 				.map((c) => {
-					return c.models.map((model) => {
+					return c.modelEnums.map((model) => {
 						return {
-							id: c.consoleId + '-' + model,
-							label: c.manufacturer + ' ' + c.name + ' ' + model,
+							id: c.consoleId + '-' + model.id,
+							label: c.manufacturer + ' ' + c.name + ' ' + model.name,
 						} as DropdownChoice
 					})
 				})
@@ -142,8 +142,8 @@ export class CompanionDataFactory {
 			name: 'Start Offline',
 			options: [consoleIdOption],
 			callback: async (event) => {
-				const { consoleId, model } = CompanionDataFactory.parseMixerSelection(event.options.mixerSelection as string)
-				this.ms.startOfflineMode(consoleId, model)
+				const { consoleId, modelId } = CompanionDataFactory.parseMixerSelection(event.options.mixerSelection as string)
+				this.ms.startOfflineMode(consoleId, modelId)
 			},
 		} as CompanionActionDefinition
 
@@ -213,8 +213,8 @@ export class CompanionDataFactory {
 		return out
 	}
 
-	static parseMixerSelection(mixerSelection: string): { consoleId: number; model: string } {
+	static parseMixerSelection(mixerSelection: string): { consoleId: number; modelId: number } {
 		const items = mixerSelection.split('-', 2)
-		return { consoleId: parseInt(items[0]), model: items[1] }
+		return { consoleId: parseInt(items[0]), modelId: parseInt(items[1]) }
 	}
 }

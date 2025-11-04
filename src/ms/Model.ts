@@ -25,9 +25,10 @@ export interface ConsoleListDto {
 
 export interface ConsoleFactoryDto {
 	manufacturer: string
+	manufacturerId: number
 	name: string
 	consoleId: number
-	models: string[]
+	modelEnums: EnumDto[]
 	supportedHardwareModels: string[]
 }
 
