@@ -52,7 +52,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> implements MsEven
 
 	onAppStateChanged(state: AppStateDto): void {
 		this.logger.debug('App state changed: ' + state.topState)
-		if (state.topState == TopState.CONNECTED) {
+		if (state.topState == TopState.CONNECTED || state.topState == TopState.IDLE) {
 			// MS is connected to a mixer
 			// -> Refresh available actions
 			void this.updateCompanionDefinitions().then(() => {})
