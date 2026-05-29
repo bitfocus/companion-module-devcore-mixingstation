@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@companion-module/base": "~1.11.3",
-    "ws": "^8.18.0"
+    "ws": "^8.20.1"
   },
   "devDependencies": {
     "@companion-module/tools": "^2.6.1",
