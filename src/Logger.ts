@@ -1,6 +1,8 @@
 import type { InstanceBase } from '@companion-module/base'
 
 export interface Logger {
+	get root(): InstanceBase<any>
+
 	error(message: string): void
 
 	warning(message: string): void
@@ -17,6 +19,10 @@ export class ModuleLogger implements Logger {
 	constructor(instance: InstanceBase<any>, tag: string) {
 		this.instance = instance
 		this.tag = '[' + tag + '] '
+	}
+
+	get root(): InstanceBase<any> {
+		return this.instance
 	}
 
 	error(message: string): void {

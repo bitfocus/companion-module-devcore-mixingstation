@@ -33,6 +33,15 @@ export class FeedbackHandler {
 		}
 		this.feedbackMap[id] = { path: path }
 
+		this.subscribeValue(path)
+	}
+
+	removeFeedback(id: string, path: string): void {
+		delete this.feedbackMap[id]
+		this.unsubscribeValue(path)
+	}
+
+	subscribeValue(path: string): void {
 		const subscription = this.subscriptions[path]
 		if (subscription && subscription.usages > 0) {
 			subscription.usages++
@@ -44,8 +53,7 @@ export class FeedbackHandler {
 		this.updateVariables()
 	}
 
-	removeFeedback(id: string, path: string): void {
-		delete this.feedbackMap[id]
+	unsubscribeValue(path: string): void {
 		const subscription = this.subscriptions[path]
 		if (!subscription) {
 			this.logger.warning('No subscription found for ' + path + ' but expected one')

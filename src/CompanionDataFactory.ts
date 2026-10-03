@@ -1,16 +1,14 @@
 import {
-	combineRgb,
 	CompanionActionDefinition,
 	CompanionActionDefinitions,
-	CompanionFeedbackDefinition,
 	CompanionFeedbackDefinitions,
 	DropdownChoice,
 } from '@companion-module/base'
-import { Logger } from './Logger.js'
+import { Logger, ModuleLogger } from './Logger.js'
 import { MixingStation } from './ms/MixingStation.js'
 import { DataPathsDto, TopState } from './ms/Model.js'
 import { FeedbackHandler } from './ms/FeedbackHandler.js'
-import { ActionFactory } from './ActionFactory.js'
+import { ActionAndFeedbackFactory } from './ActionAndFeedbackFactory.js'
 
 export interface CompanionData {
 	feedback: CompanionFeedbackDefinitions
@@ -29,8 +27,8 @@ export class CompanionDataFactory {
 	}
 
 	async build(): Promise<CompanionData> {
-		const actions = await this.buildActions()
-
+		const actions = await this.buildStaticActions()
+		const feedback: CompanionFeedbackDefinitions = {}
 		if (this.ms.getAppState().topState == TopState.CONNECTED) {
 			let treeNodes: Record<string, DataPathsDto> = {}
 			const tree = await this.ms.getAllDataPaths()
@@ -41,73 +39,19 @@ export class CompanionDataFactory {
 			const consoleInfo = await this.ms.getConsoleInfo()
 
 			if (this.ms.getAppState().topState == TopState.CONNECTED) {
-				new ActionFactory(this.ms, consoleInfo).build(treeNodes, actions)
+				new ActionAndFeedbackFactory(
+					this.ms,
+					consoleInfo,
+					this.feedbackHandler,
+					new ModuleLogger(this.logger.root, 'ActionAndFbkFactory'),
+				).build(treeNodes, actions, feedback)
 			}
 		}
 
-		const feedback = await this.buildFeedbacks([])
 		return { actions: actions, feedback: feedback }
 	}
 
-	private async buildFeedbacks(pathChoices: DropdownChoice[]): Promise<CompanionFeedbackDefinitions> {
-		const fbk = {} as CompanionFeedbackDefinitions
-		if (this.ms.getAppState().topState != TopState.CONNECTED) {
-			return fbk
-		}
-
-		fbk.getValue = {
-			name: 'Mixer value',
-			type: 'boolean',
-			defaultStyle: {
-				bgcolor: combineRgb(255, 0, 0),
-				color: combineRgb(0, 0, 0),
-			},
-			options: [
-				{
-					id: 'path',
-					type: 'dropdown',
-					choices: pathChoices,
-					label: 'Path',
-					default: '',
-				},
-			],
-			callback: async (feedback) => {
-				const path = feedback.options.path as string
-				if (path == '') {
-					return
-				}
-
-				this.logger.debug('Callback: ' + path)
-				if (!this.ms.isConnected()) {
-					return false
-				}
-				const value = this.feedbackHandler.getValue(path)
-				if (typeof value === 'boolean') return value
-				if (typeof value === 'number') return value > 0.5
-
-				return false
-			},
-			subscribe: async (feedback) => {
-				const path = feedback.options.path as string
-				if (path == '') {
-					return
-				}
-				this.logger.debug('Subscribe fbk: ' + path)
-				this.feedbackHandler.mapFeedback(feedback.id, path)
-			},
-			unsubscribe: async (feedback) => {
-				const path = feedback.options.path as string
-				if (path == '') {
-					return
-				}
-				this.logger.debug('Unsubscribe fbk: ' + path)
-				this.feedbackHandler.removeFeedback(feedback.id, path)
-			},
-		} as CompanionFeedbackDefinition
-		return fbk
-	}
-
-	private async buildActions(): Promise<CompanionActionDefinitions> {
+	private async buildStaticActions(): Promise<CompanionActionDefinitions> {
 		const actions = {} as CompanionActionDefinitions
 		if (!this.ms.isConnected()) {
 			return actions
