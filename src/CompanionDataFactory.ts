@@ -10,6 +10,7 @@ import { Logger } from './Logger.js'
 import { MixingStation } from './ms/MixingStation.js'
 import { DataPathsDto, TopState } from './ms/Model.js'
 import { FeedbackHandler } from './ms/FeedbackHandler.js'
+import { ActionFactory } from './ActionFactory.js'
 
 export interface CompanionData {
 	feedback: CompanionFeedbackDefinitions
@@ -28,15 +29,23 @@ export class CompanionDataFactory {
 	}
 
 	async build(): Promise<CompanionData> {
-		let choices: DropdownChoice[] = []
+		const actions = await this.buildActions()
+
 		if (this.ms.getAppState().topState == TopState.CONNECTED) {
+			let treeNodes: Record<string, DataPathsDto> = {}
 			const tree = await this.ms.getAllDataPaths()
-			choices = this.getAllParams(tree.child, '')
+			if (tree.child) {
+				treeNodes = tree.child
+			}
+
+			const consoleInfo = await this.ms.getConsoleInfo()
+
+			if (this.ms.getAppState().topState == TopState.CONNECTED) {
+				new ActionFactory(this.ms, consoleInfo).build(treeNodes, actions)
+			}
 		}
 
-		const feedback = await this.buildFeedbacks(choices)
-		const actions = await this.buildActions(choices)
-
+		const feedback = await this.buildFeedbacks([])
 		return { actions: actions, feedback: feedback }
 	}
 
@@ -98,7 +107,7 @@ export class CompanionDataFactory {
 		return fbk
 	}
 
-	private async buildActions(pathChoices: DropdownChoice[]): Promise<CompanionActionDefinitions> {
+	private async buildActions(): Promise<CompanionActionDefinitions> {
 		const actions = {} as CompanionActionDefinitions
 		if (!this.ms.isConnected()) {
 			return actions
@@ -146,71 +155,7 @@ export class CompanionDataFactory {
 				this.ms.startOfflineMode(consoleId, modelId)
 			},
 		} as CompanionActionDefinition
-
-		if (this.ms.getAppState().topState == TopState.CONNECTED) {
-			actions.setValue = {
-				name: 'Set Value',
-				options: [
-					{
-						id: 'path',
-						type: 'dropdown',
-						choices: pathChoices,
-						label: 'Path',
-						default: '',
-					},
-					{
-						id: 'valN',
-						type: 'number',
-						label: 'Value',
-						default: 0,
-						min: Number.MIN_VALUE,
-						max: Number.MAX_VALUE,
-					},
-				],
-				callback: async (event) => {
-					this.ms.setValue(event.options.path as string, event.options.valN as number)
-				},
-			} as CompanionActionDefinition
-			actions.toggleValue = {
-				name: 'Toggle Value',
-				options: [
-					{
-						id: 'path',
-						type: 'dropdown',
-						choices: pathChoices,
-						label: 'Path',
-						default: '',
-					},
-				],
-				callback: async (event) => {
-					await this.ms.toggleValue(event.options.path as string)
-				},
-			} as CompanionActionDefinition
-		}
 		return actions
-	}
-
-	private getAllParams(tree: Record<string, DataPathsDto>, path: string): DropdownChoice[] {
-		let out: DropdownChoice[] = []
-		for (const key in tree) {
-			const child = tree[key]
-			if (Object.prototype.hasOwnProperty.call(child, 'val')) {
-				// Value list
-				const prefix = path + key + '.'
-				const paramNames = child.val
-				for (let X = 0; X < paramNames.length; X++) {
-					const valuePath = prefix + paramNames[X]
-					out.push({ id: valuePath, label: valuePath } as DropdownChoice)
-				}
-			}
-
-			if (Object.prototype.hasOwnProperty.call(child, 'child')) {
-				// Child object
-				const items = this.getAllParams(child.child, path + key + '.')
-				out = out.concat(items)
-			}
-		}
-		return out
 	}
 
 	static parseMixerSelection(mixerSelection: string): { consoleId: number; modelId: number } {

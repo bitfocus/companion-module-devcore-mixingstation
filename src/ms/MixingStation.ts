@@ -1,7 +1,16 @@
 import WebSocket from 'ws'
 import { clearTimeout } from 'node:timers'
 import { Logger } from '../Logger.js'
-import { AppStateDto, ConsoleListDto, DataDefinitionsV2, DataPathsDto, TopState, ValueDto, ValueType } from './Model.js'
+import {
+	AppStateDto,
+	ConsoleInformationDto,
+	ConsoleListDto,
+	DataDefinitionsV2,
+	DataPathsDto,
+	TopState,
+	ValueDto,
+	ValueType,
+} from './Model.js'
 
 export interface MsEvents {
 	onConnected(): void
@@ -23,6 +32,7 @@ export interface MsEvents {
 
 const APP_STATE = '/app/state'
 const VALUE_RESPONSE = '/console/data/get/'
+const CONSOLE_INFO = '/console/information'
 
 export class MixingStation {
 	private ws: WebSocket | null = null
@@ -71,8 +81,26 @@ export class MixingStation {
 		this.send('/console/data/unsubscribe', 'POST', { path: path, format: this.valueFormat })
 	}
 
-	setValue(path: string, value: number): void {
-		this.send('/console/data/set/' + path + '/' + this.valueFormat, 'POST', { value: value })
+	async getConsoleInfo(): Promise<ConsoleInformationDto> {
+		const reply = await this.getResponse(CONSOLE_INFO, 'GET', null)
+		return reply.body as ConsoleInformationDto
+	}
+
+	async setValue(path: string, value: number | boolean, fadeTime: number): Promise<void> {
+		this.send('/console/data/set/' + path + '/' + this.valueFormat, 'POST', { value: value, fade: fadeTime })
+	}
+
+	async setValueRelative(path: string, value: number, fadeTime: number): Promise<void> {
+		const currentValue = await this.getValue(path)
+		if (typeof currentValue.value === 'boolean') {
+			await this.setValue(path, value, 0)
+			return
+		}
+		if (typeof currentValue.value === 'number') {
+			await this.setValue(path, currentValue.value + value, fadeTime)
+			return
+		}
+		this.logger.warning('Unsupported type for set value relative ' + typeof currentValue.value)
 	}
 
 	async toggleValue(path: string): Promise<void> {
@@ -80,8 +108,11 @@ export class MixingStation {
 		const currentValue = await this.getValue(path)
 		let newValue: any = null
 		if (typeof currentValue.value === 'boolean') {
-			newValue = !currentValue.value
-		} else if (typeof currentValue.value === 'number') {
+			await this.setValue(path, !currentValue.value, 0)
+			return
+		}
+
+		if (typeof currentValue.value === 'number') {
 			// We need details about the value range of this parameter
 			const def = await this.getValueDefinition(path)
 			if (def.value == null) {
@@ -107,11 +138,11 @@ export class MixingStation {
 					break
 				}
 			}
-		} else {
-			this.logger.warning('Unsupported type for toggle ' + typeof currentValue.value)
+			await this.setValue(path, newValue, 0)
 			return
 		}
-		this.send('/console/data/set/' + path + '/' + this.valueFormat, 'POST', { value: newValue })
+
+		this.logger.warning('Unsupported type for toggle ' + typeof currentValue.value)
 	}
 
 	async getValue(path: string): Promise<ValueDto> {
@@ -189,7 +220,9 @@ export class MixingStation {
 		this.listener.onConnected()
 
 		// Start ping
-		if (this.ping) clearTimeout(this.ping)
+		if (this.ping) {
+			clearTimeout(this.ping)
+		}
 		this.ping = setInterval(() => {
 			if (!this.ws) return
 			try {

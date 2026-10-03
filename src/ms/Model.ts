@@ -33,8 +33,8 @@ export interface ConsoleFactoryDto {
 }
 
 export interface DataPathsDto {
-	val: string[]
-	child: Record<string, DataPathsDto>
+	val?: string[]
+	child?: Record<string, DataPathsDto>
 }
 
 export interface DataDefinitionsV2 {
@@ -58,4 +58,32 @@ export interface NodeDefinitionDtoV2 {
 export interface EnumDto {
 	id: number
 	name: string
+}
+
+export interface ConsoleInformationDto {
+	totalChannels: number
+	channelColors: ChannelColorDefinition[]
+	channelTypes: ChannelTypeDefinition[]
+	rtaFrequencies: number[]
+	dbfsOffset: number
+}
+
+export interface ChannelTypeDefinition {
+	offset: number
+	stereo: boolean
+	name: string
+	shortName: string
+	count: number
+	type: number
+	signalTargets: SignalTargetCount[]
+}
+
+export interface SignalTargetCount {
+	count: number
+	channelType: { stereo: boolean; type: number }
+}
+
+export interface ChannelColorDefinition {
+	name: string
+	styleClass: string
 }

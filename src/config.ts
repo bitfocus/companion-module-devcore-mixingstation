@@ -10,7 +10,7 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 		{
 			type: 'textinput',
 			id: 'host',
-			label: 'IP address where Mixing Station is running',
+			label: 'IP address (or hostname) where Mixing Station is running',
 			width: 8,
 			regex: '.+',
 			default: 'localhost',
