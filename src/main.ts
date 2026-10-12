@@ -84,7 +84,8 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> implements MsEven
 		this.setActionDefinitions(data.actions)
 		this.setFeedbackDefinitions(data.feedback)
 
-		// Update any feedbacks used by companion
+		// Update any actions and feedbacks used by companion
+		this.subscribeActions()
 		this.subscribeFeedbacks()
 	}
 }

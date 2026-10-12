@@ -27,16 +27,21 @@ Live metering data is currently not implemented, but can be added in the future
 
 The following actions are provided:
 
-| Action             | Description                           |
-| ------------------ | ------------------------------------- |
-| `Start Offline`    | Starts offline mode in mixing station |
-| `Connect to Mixer` | Connects mixing station to a mixer    |
-| `Set Value`        | Sets a mixer parameter                |
+| Action                | Description                            |
+| --------------------- | -------------------------------------- |
+| `Start Offline`       | Starts offline mode in mixing station  |
+| `Connect to Mixer`    | Connects mixing station to a mixer     |
+| `Set Value (Channel)` | Sets a parameter on a specific channel |
+| `Set Value (FX)`      | Sets an FX parameter                   |
+| `Set Value (Others)`  | Sets any other mixer parameter         |
 
-### Set Value
+### Set Value (Channel) / Set Value (FX) / Set Value (Others)
 
-This action allows you to set a single mixer parameter.
-It has various modes:
+These actions allow you to set a single mixer parameter. `Set Value (Channel)` additionally has a **Channel** dropdown to pick the channel, and its **Path** dropdown only shows the part of the path
+after the channel, for example `grp.dca.0` for the DCA 1 assignment, rather than the full
+`ch.1.grp.dca.0`.
+
+They have various modes:
 
 | Mode         | Description                                               |
 | ------------ | --------------------------------------------------------- |
@@ -51,17 +56,19 @@ On/Off values are represented by `1/0`
 
 #### Fade times
 
-The action support setting fade times, requires Mixing Station 3.2.0 or newer.
+The actions support setting a fade time via the **Fade Time (ms)** option, requires Mixing Station
+3.2.0 or newer.
 
 ## Feedback / Variables
 
-The module will dynamically create variables based on the configured actions and feedback items. Thus, if you want to display
-a variable of a mixer value, make sure to create either an action or feedback item for it first.
-Afterward, a new variable will be available in companion.
+The module provides the feedbacks `Value (Channel)`, `Value (FX)` and `Value (Others)`, matching
+the actions above. The module will dynamically create variables based on the configured actions and
+feedback items. Thus, if you want to display a variable of a mixer value, make sure to create either
+an action or feedback item for it first. Afterward, a new variable will be available in companion.
 
 For example:
 
-1. Add a new feedback to a button: `Mixer value`
-2. Chose the parameter, for example `ch.1.grp.dca.0` for the DCA 1 assignment of Channel 2
+1. Add a new feedback to a button: `Value (Channel)`
+2. Choose **Channel** = channel 2 and **Path** = `grp.dca.0` for the DCA 1 assignment of Channel 2
 3. Now a new variable has automatically been created which you can for example use
    in the button text: `mixer_ch-1-grp-dca-0`

@@ -242,7 +242,7 @@ export class ActionAndFeedbackFactory {
 					return
 				}
 				this.logger.debug('Subscribe act: ' + path)
-				this.feedbackHandler.subscribeValue(path)
+				this.feedbackHandler.mapAction(info.id, path)
 			},
 			unsubscribe: async (info) => {
 				const path = decorator.getPrefix(info.options) + (info.options.path as string)
@@ -250,7 +250,7 @@ export class ActionAndFeedbackFactory {
 					return
 				}
 				this.logger.debug('Unsubscribe act: ' + path)
-				this.feedbackHandler.unsubscribeValue(path)
+				this.feedbackHandler.removeAction(info.id, path)
 			},
 		} as CompanionActionDefinition
 

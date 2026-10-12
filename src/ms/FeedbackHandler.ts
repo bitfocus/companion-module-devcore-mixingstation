@@ -8,6 +8,7 @@ export class FeedbackHandler {
 	private readonly logger: Logger
 	private readonly module: InstanceBase<any>
 	private readonly feedbackMap: Record<string, FeedbackEntry> = {}
+	private readonly actionMap: Record<string, FeedbackEntry> = {}
 
 	/**
 	 * Holds a local cache of all subscribed values mapped to their path
@@ -38,6 +39,25 @@ export class FeedbackHandler {
 
 	removeFeedback(id: string, path: string): void {
 		delete this.feedbackMap[id]
+		this.unsubscribeValue(path)
+	}
+
+	mapAction(id: string, path: string): void {
+		if (this.actionMap[id]) {
+			// Might get called multiple times when action definitions are rebuilt
+			this.logger.debug('Action ' + id + ' already subscribed')
+			return
+		}
+		this.actionMap[id] = { path: path }
+
+		this.subscribeValue(path)
+	}
+
+	removeAction(id: string, path: string): void {
+		if (!this.actionMap[id]) {
+			return
+		}
+		delete this.actionMap[id]
 		this.unsubscribeValue(path)
 	}
 
