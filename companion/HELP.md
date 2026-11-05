@@ -34,6 +34,7 @@ The following actions are provided:
 | `Set Value (Channel)` | Sets a parameter on a specific channel |
 | `Set Value (FX)`      | Sets an FX parameter                   |
 | `Set Value (Others)`  | Sets any other mixer parameter         |
+| `Load Scene/Cue`      | Recall any mixer scene/cue             |
 
 ### Set Value (Channel) / Set Value (FX) / Set Value (Others)
 
@@ -72,3 +73,8 @@ For example:
 2. Choose **Channel** = channel 2 and **Path** = `grp.dca.0` for the DCA 1 assignment of Channel 2
 3. Now a new variable has automatically been created which you can for example use
    in the button text: `mixer_ch-1-grp-dca-0`
+
+## Load Scene/Cue
+
+This action recalls a scene/cue. This depends on the current show mode.
+If your mixer is configured to use cue lists it will recall a cue, otherwise scenes.
