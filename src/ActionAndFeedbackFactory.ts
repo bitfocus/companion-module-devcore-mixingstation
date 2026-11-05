@@ -21,6 +21,7 @@ export class ActionAndFeedbackFactory {
 	 **/
 	private chTree: Record<string, DataPathsDto> = {}
 	private fxTree: Record<string, DataPathsDto> = {}
+	private showTree: Record<string, DataPathsDto> = {}
 	private remainingTree: Record<string, DataPathsDto> = {}
 
 	private readonly ms: MixingStation
@@ -88,6 +89,8 @@ export class ActionAndFeedbackFactory {
 			},
 		})
 
+		this.buildShowActionsAndFeedback(actions, feedback)
+
 		const otherParams = this.treeToDropdown(this.remainingTree, '')
 		actions.setValue = this.buildValueAction('Set Value (Others)', otherParams, {
 			finalize: (_action) => {},
@@ -103,13 +106,51 @@ export class ActionAndFeedbackFactory {
 		})
 	}
 
+	private buildShowActionsAndFeedback(actions: CompanionActionDefinitions, feedback: CompanionFeedbackDefinitions) {
+		// Remove read-only stuff
+		const loadScenePath = 'show.load'
+		actions.loadScene = {
+			name: 'Load Scene/Cue',
+			options: [
+				{
+					id: 'valN',
+					type: 'number',
+					label: 'Scene number',
+					default: 1,
+					min: 1,
+					max: Number.MAX_VALUE,
+				},
+			],
+
+			callback: async (event) => {
+				const sceneIndex = (event.options.valN as number) - 1
+				await this.ms.setValue(loadScenePath, sceneIndex, 0)
+			},
+		} as CompanionActionDefinition
+
+		const showParams = this.treeToDropdown(this.showTree, '').filter((p) => {
+			return p.id !== loadScenePath
+		})
+		feedback.showValues = this.buildValueFeedback('Show', showParams, {
+			finalize: (_feedback) => {},
+			getPrefix(_options) {
+				return ''
+			},
+		})
+	}
+
 	private parseTree(valueTree: Record<string, DataPathsDto>) {
 		this.channelSelections = []
 		this.chTree = {}
 		this.fxTree = {}
+		this.showTree = {}
 		this.remainingTree = {}
 		for (const key in valueTree) {
 			const node = valueTree[key]
+			if (key == 'show') {
+				this.showTree[key] = node
+				continue
+			}
 			if (key == 'fx') {
 				this.fxTree[key] = node
 				continue
